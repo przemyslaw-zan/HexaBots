@@ -1,2 +1,7 @@
 "use strict"
-console.log("Hello World!")
+import './styles/main.scss'
+window.alert("Hello World!")
+
+if (module.hot) {
+    module.hot.accept()
+}
