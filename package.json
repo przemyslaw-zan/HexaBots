@@ -1,0 +1,24 @@
+{
+  "name": "HexaBots",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/przemyslaw-zan/HexaBots.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/przemyslaw-zan/HexaBots/issues"
+  },
+  "homepage": "https://github.com/przemyslaw-zan/HexaBots#readme",
+  "dependencies": {
+    "webpack": "^5.26.3",
+    "webpack-cli": "^4.5.0"
+  }
+}
