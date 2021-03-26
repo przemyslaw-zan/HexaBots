@@ -19,8 +19,10 @@ export function getRandomMap(size) {
         height: size
     })
     for (let hex of map) {
-        hex.type = ["green", "saddlebrown"].random()
+        hex.type = ["0,128,0", "139,69,19"].random()
         hex.highlight = false
+        hex.visibility = 'unseen'
+        hex.player = false
     }
     return map
 }

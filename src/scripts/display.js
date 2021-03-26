@@ -10,6 +10,7 @@ export const camera = {
     y: 0,
     zoom: 0
 }
+export let currentMap
 
 //Private variables
 const canvas = document.querySelector("canvas")
@@ -18,7 +19,6 @@ let scales = []
 let hexSize
 let a_full, b_full, c_full, a_hex, b_hex, c_hex
 let halfCanvasWidth, halfCanvasHeight
-let currentMap
 let Grid = defineGrid(extendHex({}))
 
 //Public functions
@@ -49,6 +49,8 @@ export function zoomUpdate() {
     })
     for (let i = 0; i < currentMap.length; i++) {
         currentMap[i].type = oldMap[i].type
+        currentMap[i].player = oldMap[i].player
+        currentMap[i].visibility = oldMap[i].visibility
         if (currentMap[i].x === x && currentMap[i].y === y) {
             camera.x = Math.round(currentMap[i].toPoint().x + b_full + (hexSize / 2))
             camera.y = Math.round(currentMap[i].toPoint().y + c_full)
@@ -67,6 +69,9 @@ function draw() {
     ctx.translate(-camera.x + halfCanvasWidth, -camera.y + halfCanvasHeight)
 
     for (let hex of currentMap) {
+        //Hex is ignored if it wasn't seen yet
+        if (hex.visibility === 'unseen') continue
+
         let x = hex.toPoint().x,
             y = hex.toPoint().y
 
@@ -89,7 +94,7 @@ function draw() {
         }
 
         //Drawing the hex
-        ctx.fillStyle = hex.type
+        ctx.fillStyle = `rgba(${hex.type},${hex.visibility === 'seen' ? '0.5' : '1'})`
         ctx.beginPath()
         ctx.moveTo(x + a_hex, y - c_hex)
         ctx.lineTo(x + b_hex, y)
@@ -99,6 +104,21 @@ function draw() {
         ctx.lineTo(x - a_hex, y - c_hex)
         ctx.closePath()
         ctx.fill()
+
+        //Skipping to the next hex if not currently visible
+        if (hex.visibility === 'seen') continue
+
+        //Drawing player
+        if (hex.player) {
+            ctx.fillStyle = "white"
+            ctx.beginPath()
+            ctx.arc(x, y, hexSize / 2, 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#8B0000"
+            ctx.stroke()
+            ctx.closePath()
+        }
     }
     requestAnimationFrame(draw)
 }
