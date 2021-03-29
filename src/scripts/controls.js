@@ -37,7 +37,7 @@ export function initiateControls() {
     })
 
     document.querySelector("#zoom_in").addEventListener('mousedown', () => {
-        if (DISPLAY.camera.zoom < 2) DISPLAY.camera.zoom++
+        if (DISPLAY.camera.zoom < 3) DISPLAY.camera.zoom++
         DISPLAY.zoomUpdate()
     })
 
@@ -133,6 +133,11 @@ function movePlayer(direction) {
         return
     }
 
+    if (neighbors[direction].walkable === false) {
+        window.alert("You can't walk here!")
+        return
+    }
+
     //Moving the player
     hex.player = false
     neighbors[direction].player = true
@@ -140,13 +145,20 @@ function movePlayer(direction) {
     PLAYER.properties.position.y = neighbors[direction].y
 
     //Changing previously visible hexes to "seen"
-    DISPLAY.currentMap.forEach((item, i, arr) => {
+    DISPLAY.currentMap.forEach((hex, i, arr) => {
         if (arr[i].visibility === "visible") arr[i].visibility = "seen"
     })
 
-    //Changing hexes in range to "visible"
+    //Visibility check
     let visibleHexes = DISPLAY.currentMap.hexesInRange(neighbors[direction], PLAYER.properties.visibilityRange)
-    visibleHexes.forEach((item) => {
-        item.visibility = "visible"
+    visibleHexes.forEach((hex) => {
+        let line = DISPLAY.currentMap.hexesBetween(neighbors[direction], hex)
+        line.forEach((hex, i, arr) => {
+            hex.visibility = "visible"
+            if (!hex.seeThrough) arr.length = i++ //This line acts like "Break"
+        })
     })
+
+    DISPLAY.camera.x = neighbors[direction].toPoint().x
+    DISPLAY.camera.y = neighbors[direction].toPoint().y
 }

@@ -7,7 +7,7 @@ export const properties = {
         x: 0,
         y: 0
     },
-    visibilityRange: 3
+    visibilityRange: 6
 }
 
 //Private variables

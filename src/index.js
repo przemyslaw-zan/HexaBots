@@ -11,19 +11,16 @@ import * as PLAYER from './scripts/player.js'
 console.clear();
 
 
+const mapSize = 37
 
-let map = MAPGENERATOR.getRandomMap(15)
-map.get([PLAYER.properties.position.x, PLAYER.properties.position.y]).player = true
-
-for (let hex of map.hexesInRange(map[0], PLAYER.properties.visibilityRange)) {
-    if (hex !== undefined) {
-        hex.visibility = "visible"
-    }
-}
+let map = MAPGENERATOR.getRandomMap(mapSize)
+PLAYER.properties.position.x = Math.round(mapSize/2)-1
+PLAYER.properties.position.y = 2
 
 DISPLAY.initiateMap(map)
 CONTROLS.initiateControls()
 
+document.querySelector("#move_s").click()
 
 
 if (module.hot) {

@@ -38,19 +38,16 @@ export function zoomUpdate() {
     const y = hex.y
     hexSize = scales[camera.zoom]
     calculateHexDimensions()
-    let oldMap = currentMap
     Grid = defineGrid(extendHex({
         size: hexSize,
         orientation: 'flat'
     }))
-    currentMap = Grid.rectangle({
+    const replacementMap = Grid.rectangle({
         width: currentMap.width,
         height: currentMap.height
     })
     for (let i = 0; i < currentMap.length; i++) {
-        currentMap[i].type = oldMap[i].type
-        currentMap[i].player = oldMap[i].player
-        currentMap[i].visibility = oldMap[i].visibility
+        currentMap[i].size = replacementMap[i].size
         if (currentMap[i].x === x && currentMap[i].y === y) {
             camera.x = Math.round(currentMap[i].toPoint().x + b_full + (hexSize / 2))
             camera.y = Math.round(currentMap[i].toPoint().y + c_full)
@@ -64,8 +61,8 @@ function draw() {
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.fillStyle = "black"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-    //const camX = -camera.x + halfCanvasWidth
-    //const camY = -camera.y + halfCanvasHeight
+
+    //Positioning the camera
     ctx.translate(-camera.x + halfCanvasWidth, -camera.y + halfCanvasHeight)
 
     for (let hex of currentMap) {
@@ -94,7 +91,7 @@ function draw() {
         }
 
         //Drawing the hex
-        ctx.fillStyle = `rgba(${hex.type},${hex.visibility === 'seen' ? '0.5' : '1'})`
+        ctx.fillStyle = `rgba(${hex.type},${hex.visibility === 'seen' ? '0.25' : '1'})`
         ctx.beginPath()
         ctx.moveTo(x + a_hex, y - c_hex)
         ctx.lineTo(x + b_hex, y)
@@ -138,7 +135,7 @@ function windowResizeUpdate() {
     halfCanvasWidth = canvas.width / 2
     halfCanvasHeight = canvas.height / 2
     const min = Math.min(halfCanvasWidth, halfCanvasHeight)
-    scales = [min / 10, min / 7, min / 4]
+    scales = [min / 15, min / 10, min / 7, min / 4]
 }
 
 //Hex Highlighting
