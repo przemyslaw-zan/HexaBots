@@ -10,18 +10,18 @@ import * as PLAYER from './scripts/player.js'
 //https://github.com/flauwekeul/honeycomb
 console.clear();
 
-
-const mapSize = 37
-
-let map = MAPGENERATOR.getRandomMap(mapSize)
-PLAYER.properties.position.x = Math.round(mapSize/2)-1
-PLAYER.properties.position.y = 2
+let map = MAPGENERATOR.getRandomMap(37)
+for (let hex of map) {
+    if (hex.walkable) {
+        PLAYER.properties.position.x = hex.x
+        PLAYER.properties.position.y = hex.y
+        hex.player = true
+        break
+    }
+}
 
 DISPLAY.initiateMap(map)
 CONTROLS.initiateControls()
-
-document.querySelector("#move_s").click()
-
 
 if (module.hot) {
     module.hot.accept()

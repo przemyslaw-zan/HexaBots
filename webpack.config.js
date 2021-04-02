@@ -8,7 +8,7 @@ const {
 
 const config = {
     output: {
-        filename: 'main.[hash].js',
+        filename: 'main.[contenthash].js',
         path: path.resolve(__dirname, 'docs')
     },
     plugins: [new HtmlWebpackPlugin({
@@ -48,7 +48,7 @@ if (currentTask === 'build') {
     config.mode = 'production'
     config.module.rules[0].use[0] = MiniCssExtractPlugin.loader
     config.plugins.push(new MiniCssExtractPlugin({
-        filename: 'main.[hash].css'
+        filename: 'main.[contenthash].css'
     }), new CleanWebpackPlugin())
 }
 

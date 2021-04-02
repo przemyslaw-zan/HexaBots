@@ -10,7 +10,9 @@ import * as PLAYER from '../scripts/player.js'
 
 //Public functions
 export function initiateControls() {
-    //Player controls    
+    updateVisibility(DISPLAY.currentMap.get([PLAYER.properties.position.x, PLAYER.properties.position.y]))
+
+    //Player controls
     document.querySelector("#move_q").addEventListener('click', () => {
         movePlayer(3)
     })
@@ -133,6 +135,7 @@ function movePlayer(direction) {
         return
     }
 
+    //Checking if target hex is walkable
     if (neighbors[direction].walkable === false) {
         window.alert("You can't walk here!")
         return
@@ -144,21 +147,22 @@ function movePlayer(direction) {
     PLAYER.properties.position.x = neighbors[direction].x
     PLAYER.properties.position.y = neighbors[direction].y
 
-    //Changing previously visible hexes to "seen"
-    DISPLAY.currentMap.forEach((hex, i, arr) => {
-        if (arr[i].visibility === "visible") arr[i].visibility = "seen"
-    })
-
-    //Visibility check
-    let visibleHexes = DISPLAY.currentMap.hexesInRange(neighbors[direction], PLAYER.properties.visibilityRange)
-    visibleHexes.forEach((hex) => {
-        let line = DISPLAY.currentMap.hexesBetween(neighbors[direction], hex)
-        line.forEach((hex, i, arr) => {
-            hex.visibility = "visible"
-            if (!hex.seeThrough) arr.length = i++ //This line acts like "Break"
-        })
-    })
+    updateVisibility(neighbors[direction])
 
     DISPLAY.camera.x = neighbors[direction].toPoint().x
     DISPLAY.camera.y = neighbors[direction].toPoint().y
+}
+
+function updateVisibility(centerHex) {
+    DISPLAY.currentMap.forEach((hex, i, arr) => {
+        if (arr[i].visibility === "visible") arr[i].visibility = "seen"
+    })
+    let visibleHexes = DISPLAY.currentMap.hexesInRange(centerHex, PLAYER.properties.visibilityRange)
+    visibleHexes.forEach((hex) => {
+        let line = DISPLAY.currentMap.hexesBetween(centerHex, hex)
+        line.forEach((hex, i, arr) => {
+            hex.visibility = "visible"
+            if (!hex.seeThrough) arr.length = i++ //This line acts like "break"
+        })
+    })
 }
