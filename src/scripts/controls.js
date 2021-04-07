@@ -128,29 +128,44 @@ export function initiateControls() {
 function movePlayer(direction) {
     let hex = DISPLAY.currentMap.get([PLAYER.properties.position.x, PLAYER.properties.position.y])
     let neighbors = DISPLAY.currentMap.neighborsOf(hex)
+    let targetHex = neighbors[direction]
 
     //Checking if hex is not outside map
-    if (neighbors[direction] === undefined) {
+    if (targetHex === undefined) {
         window.alert("You are trying to leave the map!")
         return
     }
 
     //Checking if target hex is walkable
-    if (neighbors[direction].walkable === false) {
+    if (targetHex.walkable === false) {
         window.alert("You can't walk here!")
         return
     }
 
     //Moving the player
     hex.player = false
-    neighbors[direction].player = true
-    PLAYER.properties.position.x = neighbors[direction].x
-    PLAYER.properties.position.y = neighbors[direction].y
 
-    updateVisibility(neighbors[direction])
+    const coords = animationPath(hex.toPoint(), targetHex.toPoint())
+    let i = 0
+    let animation = setInterval(() => {
+        DISPLAY.animation.x = coords[i].x
+        DISPLAY.animation.y = coords[i].y
+        i++
+        if (i >= coords.length) {
+            clearInterval(animation)
+            DISPLAY.animation.x = -999
+            DISPLAY.animation.y = -999
+        }
+    }, 10)
 
-    DISPLAY.camera.x = neighbors[direction].toPoint().x
-    DISPLAY.camera.y = neighbors[direction].toPoint().y
+    targetHex.player = true
+    PLAYER.properties.position.x = targetHex.x
+    PLAYER.properties.position.y = targetHex.y
+
+    updateVisibility(targetHex)
+
+    //DISPLAY.camera.x = targetHex.toPoint().x
+    //DISPLAY.camera.y = targetHex.toPoint().y
 }
 
 function updateVisibility(centerHex) {
@@ -165,4 +180,20 @@ function updateVisibility(centerHex) {
             if (!hex.seeThrough) arr.length = i++ //This line acts like "break"
         })
     })
+}
+
+function animationPath(startHex, endHex) {
+    const numberOfSteps = 20
+    const stepX = (endHex.x - startHex.x) / (numberOfSteps - 1)
+    const stepY = (endHex.y - startHex.y) / (numberOfSteps - 1)
+    const arr = []
+    for (let i = 0; i < numberOfSteps; i++) {
+        const x = startHex.x + stepX * i
+        const y = startHex.y + stepY * i
+        arr.push({
+            x,
+            y
+        })
+    }
+    return arr
 }

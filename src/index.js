@@ -19,7 +19,6 @@ for (let hex of map) {
         break
     }
 }
-
 DISPLAY.initiateMap(map)
 CONTROLS.initiateControls()
 

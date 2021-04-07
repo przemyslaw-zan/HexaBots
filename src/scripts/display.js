@@ -10,11 +10,17 @@ export const camera = {
     y: 0,
     zoom: 0
 }
+export const animation = {
+    x: -999,
+    y: -999
+}
 export let currentMap
 
 //Private variables
-const canvas = document.querySelector("canvas")
-const ctx = canvas.getContext("2d")
+const mainCanvas = document.querySelector("#mainCanvas")
+const animCanvas = document.querySelector("#animationCanvas")
+const mainCtx = mainCanvas.getContext("2d")
+const animCtx = animCanvas.getContext("2d")
 let scales = []
 let hexSize
 let a_full, b_full, c_full, a_hex, b_hex, c_hex
@@ -24,12 +30,15 @@ let Grid = defineGrid(extendHex({}))
 //Public functions
 export function initiateMap(map) {
     currentMap = map
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    mainCanvas.width = window.innerWidth
+    mainCanvas.height = window.innerHeight
+    animCanvas.width = window.innerWidth
+    animCanvas.height = window.innerHeight
     calculateHexDimensions()
     windowResizeUpdate()
     zoomUpdate()
-    draw()
+    drawMap()
+    drawAnimtions()
 }
 
 export function zoomUpdate() {
@@ -56,14 +65,14 @@ export function zoomUpdate() {
 }
 
 //Private functions
-function draw() {
+function drawMap() {
     //Clearing
-    ctx.setTransform(1, 0, 0, 1, 0, 0)
-    ctx.fillStyle = "black"
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    mainCtx.setTransform(1, 0, 0, 1, 0, 0)
+    mainCtx.fillStyle = "black"
+    mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height)
 
     //Positioning the camera
-    ctx.translate(-camera.x + halfCanvasWidth, -camera.y + halfCanvasHeight)
+    mainCtx.translate(-camera.x + halfCanvasWidth, -camera.y + halfCanvasHeight)
 
     for (let hex of currentMap) {
         //Hex is ignored if it wasn't seen yet
@@ -78,46 +87,67 @@ function draw() {
 
         //Drawing highlight around hex
         if (hex.highlight) {
-            ctx.fillStyle = "white"
-            ctx.beginPath()
-            ctx.moveTo(x + a_full, y - c_full)
-            ctx.lineTo(x + b_full, y)
-            ctx.lineTo(x + a_full, y + c_full)
-            ctx.lineTo(x - a_full, y + c_full)
-            ctx.lineTo(x - b_full, y)
-            ctx.lineTo(x - a_full, y - c_full)
-            ctx.closePath()
-            ctx.fill()
+            mainCtx.strokeStyle = "white"
+            mainCtx.beginPath()
+            mainCtx.moveTo(x + a_full, y - c_full)
+            mainCtx.lineTo(x + b_full, y)
+            mainCtx.lineTo(x + a_full, y + c_full)
+            mainCtx.lineTo(x - a_full, y + c_full)
+            mainCtx.lineTo(x - b_full, y)
+            mainCtx.lineTo(x - a_full, y - c_full)
+            mainCtx.closePath()
+            mainCtx.stroke()
         }
 
         //Drawing the hex
-        ctx.fillStyle = `rgba(${hex.type},${hex.visibility === 'seen' ? '0.25' : '1'})`
-        ctx.beginPath()
-        ctx.moveTo(x + a_hex, y - c_hex)
-        ctx.lineTo(x + b_hex, y)
-        ctx.lineTo(x + a_hex, y + c_hex)
-        ctx.lineTo(x - a_hex, y + c_hex)
-        ctx.lineTo(x - b_hex, y)
-        ctx.lineTo(x - a_hex, y - c_hex)
-        ctx.closePath()
-        ctx.fill()
+        mainCtx.fillStyle = `rgba(${hex.type},${hex.visibility === 'seen' ? '0.25' : '1'})`
+        mainCtx.beginPath()
+        mainCtx.moveTo(x + a_hex, y - c_hex)
+        mainCtx.lineTo(x + b_hex, y)
+        mainCtx.lineTo(x + a_hex, y + c_hex)
+        mainCtx.lineTo(x - a_hex, y + c_hex)
+        mainCtx.lineTo(x - b_hex, y)
+        mainCtx.lineTo(x - a_hex, y - c_hex)
+        mainCtx.closePath()
+        mainCtx.fill()
 
         //Skipping to the next hex if not currently visible
         if (hex.visibility === 'seen') continue
 
         //Drawing player
         if (hex.player) {
-            ctx.fillStyle = "white"
-            ctx.beginPath()
-            ctx.arc(x, y, hexSize / 2, 0, 2 * Math.PI)
-            ctx.fill()
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = "#8B0000"
-            ctx.stroke()
-            ctx.closePath()
+            mainCtx.fillStyle = "white"
+            mainCtx.beginPath()
+            mainCtx.arc(x, y, hexSize / 2, 0, 2 * Math.PI)
+            mainCtx.fill()
+            mainCtx.lineWidth = 3;
+            mainCtx.strokeStyle = "#8B0000"
+            mainCtx.stroke()
+            mainCtx.closePath()
         }
     }
-    requestAnimationFrame(draw)
+
+    requestAnimationFrame(drawMap)
+}
+
+function drawAnimtions() {
+    //Clearing
+    animCtx.setTransform(1, 0, 0, 1, 0, 0)
+    animCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height)
+
+    //Positioning the camera
+    animCtx.translate(-camera.x + halfCanvasWidth, -camera.y + halfCanvasHeight)
+
+    animCtx.fillStyle = "white"
+    animCtx.beginPath()
+    animCtx.arc(animation.x, animation.y, hexSize / 2, 0, 2 * Math.PI)
+    animCtx.fill()
+    animCtx.lineWidth = 3;
+    animCtx.strokeStyle = "#8B0000"
+    animCtx.stroke()
+    animCtx.closePath()
+
+    requestAnimationFrame(drawAnimtions)
 }
 
 function calculateHexDimensions() {
@@ -130,21 +160,23 @@ function calculateHexDimensions() {
 }
 
 function windowResizeUpdate() {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-    halfCanvasWidth = canvas.width / 2
-    halfCanvasHeight = canvas.height / 2
+    mainCanvas.width = window.innerWidth
+    mainCanvas.height = window.innerHeight
+    animCanvas.width = window.innerWidth
+    animCanvas.height = window.innerHeight
+    halfCanvasWidth = mainCanvas.width / 2
+    halfCanvasHeight = mainCanvas.height / 2
     const min = Math.min(halfCanvasWidth, halfCanvasHeight)
     scales = [min / 15, min / 10, min / 7, min / 4]
 }
 
 //Hex Highlighting
-canvas.addEventListener('mousemove', ({
+animCanvas.addEventListener('click', ({
     offsetX,
     offsetY
 }) => {
-    offsetX += camera.x + b_full - (canvas.width / 2)
-    offsetY += camera.y + c_full - (canvas.height / 2)
+    offsetX += camera.x + b_full - (mainCanvas.width / 2)
+    offsetY += camera.y + c_full - (mainCanvas.height / 2)
     const hexCoordinates = Grid.pointToHex(offsetX, offsetY)
     for (let hex of currentMap) hex.highlight = false
     try {
